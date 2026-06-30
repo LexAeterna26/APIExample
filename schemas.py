@@ -13,3 +13,6 @@ class SCountry(SCountryAdd):
 
 class SCountryId(BaseModel):
     id: int
+
+class NotFoundMessage(BaseModel):
+    detail: str

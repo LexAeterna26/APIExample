@@ -1,4 +1,6 @@
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import result
+
 from database import CountryOrm, new_session
 from schemas import SCountryAdd, SCountry
 from typing import List
@@ -22,3 +24,12 @@ class CountryRepository:
             country_models = result.scalars().all()
             countries = [SCountry.model_validate(country_model) for country_model in country_models]
             return countries
+
+    @classmethod
+    async def get_country(cls, country_id: int) -> SCountry:
+        async with new_session() as session:
+            query = select(CountryOrm).where(CountryOrm.id == country_id)
+            result = await session.execute(query)
+            country_model = result.scalar_one()
+            country = SCountry.model_validate(country_model)
+            return country
