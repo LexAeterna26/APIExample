@@ -22,3 +22,13 @@ class SCountryUpdate(BaseModel):
 
 class NotFoundMessage(BaseModel):
     detail: str
+
+class StatsField(BaseModel):
+    min: Optional[float] = None
+    max: Optional[float] = None
+    avg: Optional[float] = None
+
+class CountriesStats(BaseModel):
+    population: StatsField
+    area: StatsField
+    gdp: StatsField

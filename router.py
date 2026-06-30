@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from starlette.responses import JSONResponse
 from repository import CountryRepository
-from schemas import SCountry, SCountryAdd, SCountryUpdate, NotFoundMessage
+from schemas import SCountry, SCountryAdd, SCountryUpdate, NotFoundMessage, CountriesStats
 from typing import List, Union
 from sqlalchemy.exc import NoResultFound
 
@@ -33,6 +33,11 @@ async def add_country(
 async def get_countries() -> List[SCountry]:
     countries = await CountryRepository.get_countries()
     return countries
+
+@router.get("/stats")
+async def get_stats() -> CountriesStats:
+    stats = await CountryRepository.get_stats()
+    return stats
 
 @router.get(
     "/{country_id}",

@@ -1,6 +1,6 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database import CountryOrm, new_session
-from schemas import SCountryAdd, SCountry, SCountryUpdate
+from schemas import SCountryAdd, SCountry, SCountryUpdate, CountriesStats, StatsField
 from typing import List
 
 class CountryRepository:
@@ -52,3 +52,37 @@ class CountryRepository:
             await session.delete(country_model)
             await session.commit()
             return
+
+    @classmethod
+    async def get_stats(cls) -> CountriesStats:
+        async with new_session() as session:
+            stmt = select(
+                func.min(CountryOrm.population).label("population_min"),
+                func.max(CountryOrm.population).label("population_max"),
+                func.avg(CountryOrm.population).label("population_avg"),
+                func.min(CountryOrm.area).label("area_min"),
+                func.max(CountryOrm.area).label("area_max"),
+                func.avg(CountryOrm.area).label("area_avg"),
+                func.min(CountryOrm.gdp).label("gdp_min"),
+                func.max(CountryOrm.gdp).label("gdp_max"),
+                func.avg(CountryOrm.gdp).label("gdp_avg"),
+            )
+            result = await session.execute(stmt)
+            row = result.one()
+            return CountriesStats(
+                population=StatsField(
+                    min=row.population_min,
+                    max=row.population_max,
+                    avg=row.population_avg,
+                ),
+                area=StatsField(
+                    min=row.area_min,
+                    max=row.area_max,
+                    avg=row.area_avg,
+                ),
+                gdp=StatsField(
+                    min=row.gdp_min,
+                    max=row.gdp_max,
+                    avg=row.gdp_avg,
+                ),
+            )
