@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException, status
-from starlette.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, status, Depends
 from repository import CountryRepository
 from schemas import SCountry, SCountryAdd, SCountryUpdate, NotFoundMessage, CountriesStats
-from typing import List, Union
+from typing import List
 from sqlalchemy.exc import NoResultFound
 
 router = APIRouter(
@@ -11,23 +10,10 @@ router = APIRouter(
 )
 
 @router.post("")
-async def add_country(
-        name: str,
-        official_language: str,
-        population: int,
-        area: float,
-        gdp: float,
-) -> SCountry:
-    country = SCountryAdd(
-        name=name,
-        official_language=official_language,
-        population=population,
-        area=area,
-        gdp=gdp,
-    )
+async def add_country(country: SCountryAdd = Depends()) -> SCountry:
     new_country_id = await CountryRepository.add_country(country)
-    country = await CountryRepository.get_country(new_country_id)
-    return country
+    new_country = await CountryRepository.get_country(new_country_id)
+    return new_country
 
 @router.get("")
 async def get_countries() -> List[SCountry]:
@@ -59,24 +45,9 @@ async def get_country(country_id: int) -> SCountry:
     response_model=SCountry,
     responses={404: {"model": NotFoundMessage}},
 )
-async def update_country(
-        country_id: int,
-        name: str = None,
-        official_language: str = None,
-        population: int = None,
-        area: float = None,
-        gdp: float = None,
-) -> SCountry:
-    country = SCountryUpdate(
-        id=country_id,
-        name=name,
-        official_language=official_language,
-        population=population,
-        area=area,
-        gdp=gdp,
-    )
+async def update_country(country_id: int, country: SCountryUpdate = Depends()) -> SCountry:
     try:
-        updated_country_id = await CountryRepository.update_country(country)
+        updated_country_id = await CountryRepository.update_country(country_id, country)
         updated_country = await CountryRepository.get_country(updated_country_id)
         return updated_country
     except NoResultFound:

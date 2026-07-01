@@ -33,15 +33,15 @@ class CountryRepository:
             return country
 
     @classmethod
-    async def update_country(cls, country: SCountryUpdate) -> int:
+    async def update_country(cls, country_id: int, country: SCountryUpdate) -> int:
         async with new_session() as session:
-            query = select(CountryOrm).where(CountryOrm.id == country.id)
+            query = select(CountryOrm).where(CountryOrm.id == country_id)
             result = await session.execute(query)
             country_model = result.scalar_one()
             for key, value in country.model_dump(exclude_none=True).items():
                 setattr(country_model, key, value)
             await session.commit()
-            return country.id
+            return country_id
 
     @classmethod
     async def delete_country(cls, country_id: int):
