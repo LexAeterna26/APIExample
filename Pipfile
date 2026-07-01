@@ -9,6 +9,7 @@ fastapi = "*"
 pydantic = "*"
 SQLAlchemy = "*"
 uvicorn = "*"
+pytest = "*"
 
 [dev-packages]
 
