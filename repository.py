@@ -1,7 +1,7 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, asc, desc
 from database import CountryOrm, new_session
-from schemas import SCountryAdd, SCountry, SCountryUpdate, CountriesStats, StatsField
-from typing import List
+from schemas import SCountryAdd, SCountry, SCountryUpdate, CountriesStats, StatsField, SortOptions
+from typing import List, cast
 
 class CountryRepository:
     @classmethod
@@ -15,9 +15,16 @@ class CountryRepository:
             return new_country.id
 
     @classmethod
-    async def get_countries(cls) -> List[SCountry]:
+    async def get_countries(cls, sort: SortOptions) -> List[SCountry]:
         async with new_session() as session:
             query = select(CountryOrm)
+            if sort.sort_by:
+                column = getattr(CountryOrm, sort.sort_by, None)
+                if column is not None:
+                    if cast(str, sort.order).lower() == "desc":
+                        query = query.order_by(desc(cast(str, column)))
+                    else:
+                        query = query.order_by(asc(cast(str, column)))
             result = await session.execute(query)
             country_models = result.scalars().all()
             countries = [SCountry.model_validate(country_model) for country_model in country_models]

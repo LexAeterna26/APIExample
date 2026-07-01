@@ -31,3 +31,22 @@ class CountriesStats(BaseModel):
     population: StatsField
     area: StatsField
     gdp: StatsField
+
+class SortOptions(BaseModel):
+    sort_by: Optional[str] = None
+    order: Optional[str] = "asc"
+
+    @field_validator("sort_by")
+    @classmethod
+    def validate_sort_by(cls, val: Optional[str]) -> Optional[str]:
+        allowed = {"name", "official_language", "population", "area", "gdp"}
+        if val is not None and val not in allowed:
+            raise ValueError(f"Sort_by must be one of {allowed}")
+        return val
+
+    @field_validator("order")
+    @classmethod
+    def validate_order(cls, val: str) -> str:
+        if val not in {"asc", "desc"}:
+            raise ValueError("Order must be 'asc' or 'desc'")
+        return val

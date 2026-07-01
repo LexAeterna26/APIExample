@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from repository import CountryRepository
-from schemas import SCountry, SCountryAdd, SCountryUpdate, NotFoundMessage, CountriesStats
+from schemas import SCountry, SCountryAdd, SCountryUpdate, NotFoundMessage, CountriesStats, SortOptions
 from typing import List
 from sqlalchemy.exc import NoResultFound
 
@@ -16,8 +16,8 @@ async def add_country(country: SCountryAdd = Depends()) -> SCountry:
     return new_country
 
 @router.get("")
-async def get_countries() -> List[SCountry]:
-    countries = await CountryRepository.get_countries()
+async def get_countries(sort: SortOptions = Depends()) -> List[SCountry]:
+    countries = await CountryRepository.get_countries(sort)
     return countries
 
 @router.get("/stats")
