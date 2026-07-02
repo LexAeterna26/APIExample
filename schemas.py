@@ -1,6 +1,8 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
 from typing import Optional
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+
+# Схема для добавления информации о новой стране
 class SCountryAdd(BaseModel):
     name: str
     official_language: str
@@ -8,10 +10,14 @@ class SCountryAdd(BaseModel):
     area: float = Field(ge=0.0)
     gdp: float = Field(ge=0.0)
 
+
+# Схема для получения информации о стране
 class SCountry(SCountryAdd):
     id: int
     model_config = ConfigDict(from_attributes=True)
 
+
+# Схема для обновления информации о стране
 class SCountryUpdate(BaseModel):
     name: Optional[str] = None
     official_language: Optional[str] = None
@@ -19,18 +25,25 @@ class SCountryUpdate(BaseModel):
     area: Optional[float] = Field(default=None, ge=0.0)
     gdp: Optional[float] = Field(default=None, ge=0.0)
 
+
+# Схема для ошибки в случе, если нет страны с заданным ID
 class NotFoundMessage(BaseModel):
     detail: str
 
+
+# Схема для вывода статистики по числовому полю
 class StatsField(BaseModel):
     min: Optional[float] = None
     max: Optional[float] = None
     avg: Optional[float] = None
 
+
+# Схема для вывода статистики по всем числовым полям
 class CountriesStats(BaseModel):
     population: StatsField
     area: StatsField
     gdp: StatsField
+
 
 class SortOptions(BaseModel):
     sort_by: Optional[str] = None

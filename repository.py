@@ -1,9 +1,20 @@
-from sqlalchemy import select, func, asc, desc
-from database import CountryOrm, new_session
-from schemas import SCountryAdd, SCountry, SCountryUpdate, CountriesStats, StatsField, SortOptions
 from typing import List, cast
 
+from database import CountryOrm, new_session
+from schemas import (
+    CountriesStats,
+    SCountry,
+    SCountryAdd,
+    SCountryUpdate,
+    SortOptions,
+    StatsField,
+)
+from sqlalchemy import asc, desc, func, select
+
+
+# Класс для работы с базой данных
 class CountryRepository:
+    # Метод для добавления страны в базу данных
     @classmethod
     async def add_country(cls, country: SCountryAdd) -> int:
         async with new_session() as session:
@@ -14,6 +25,7 @@ class CountryRepository:
             await session.commit()
             return new_country.id
 
+    # Метод для получения информации о всех странах из базы данных
     @classmethod
     async def get_countries(cls, sort: SortOptions) -> List[SCountry]:
         async with new_session() as session:
@@ -27,9 +39,13 @@ class CountryRepository:
                         query = query.order_by(asc(cast(str, column)))
             result = await session.execute(query)
             country_models = result.scalars().all()
-            countries = [SCountry.model_validate(country_model) for country_model in country_models]
+            countries = [
+                SCountry.model_validate(country_model)
+                for country_model in country_models
+            ]
             return countries
 
+    # Метод для получения информации о стране из базы данных
     @classmethod
     async def get_country(cls, country_id: int) -> SCountry:
         async with new_session() as session:
@@ -39,6 +55,7 @@ class CountryRepository:
             country = SCountry.model_validate(country_model)
             return country
 
+    # Метод для обновления информации о стране из базы данных
     @classmethod
     async def update_country(cls, country_id: int, country: SCountryUpdate) -> int:
         async with new_session() as session:
@@ -50,6 +67,7 @@ class CountryRepository:
             await session.commit()
             return country_id
 
+    # Метод для удаления информации о стране из базы данных
     @classmethod
     async def delete_country(cls, country_id: int):
         async with new_session() as session:
@@ -60,6 +78,7 @@ class CountryRepository:
             await session.commit()
             return
 
+    # Метод для получения статистики по числовым полям из базы данных
     @classmethod
     async def get_stats(cls) -> CountriesStats:
         async with new_session() as session:
